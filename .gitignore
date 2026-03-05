@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.db
+*.db-journal
+.vercel
+.cursor/
+api/_server.js
+api/_server.mjs
