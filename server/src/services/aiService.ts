@@ -152,11 +152,14 @@ export async function generateImage(prompt: string): Promise<string | null> {
 
   try {
     const client = new InferenceClient(hfKey);
-    const image = await client.textToImage({
-      // SDXL base oficial da Stability AI, com suporte em Inference Providers.
-      model: 'stabilityai/stable-diffusion-xl-base-1.0',
-      inputs: `anime style, original ninja RPG character (not Naruto, not an existing anime character), ${prompt}, high quality, detailed, vibrant colors`,
-    });
+    const image = await client.textToImage(
+      {
+        // SDXL base oficial da Stability AI, com suporte em Inference Providers.
+        model: 'stabilityai/stable-diffusion-xl-base-1.0',
+        inputs: `anime style, original ninja RPG character (not Naruto, not an existing anime character), ${prompt}, high quality, detailed, vibrant colors`,
+      },
+      { outputType: 'blob' }
+    );
 
     const buffer = Buffer.from(await image.arrayBuffer());
     const base64 = buffer.toString('base64');

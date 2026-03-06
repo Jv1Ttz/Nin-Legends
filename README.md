@@ -6,9 +6,9 @@ Aplicação web de RPG de texto onde uma IA atua como mestre de RPG (Game Master
 
 - **Frontend:** React 18 + Vite + TypeScript + TailwindCSS
 - **Backend:** Node.js + Express + TypeScript
-- **Banco de Dados:** SQLite (via Prisma ORM)
-- **IA Texto:** Google Gemini API
-- **IA Imagens:** Hugging Face Inference API (Stable Diffusion)
+- **Banco de Dados:** PostgreSQL (via Prisma ORM — ex.: Supabase)
+- **IA Texto:** Google Gemini API (ou Groq, configurado via ambiente)
+- **IA Imagens:** Hugging Face Inference API (Stable Diffusion XL)
 - **Audio:** Howler.js
 
 ## Setup Rápido
@@ -25,10 +25,12 @@ cd ../server && npm install
 Edite `server/.env`:
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://usuario:senha@host:5432/banco"
 JWT_SECRET="sua-chave-secreta-aqui"
 GEMINI_API_KEY="sua-chave-gemini-aqui"
-HUGGINGFACE_API_KEY="sua-chave-huggingface-aqui"
+GROQ_API_KEY="sua-chave-groq-aqui"            # opcional, se quiser usar Groq
+HUGGINGFACE_API_KEY="sua-chave-huggingface-aqui" # opcional, apenas para imagens
+AI_PROVIDER="gemini"                          # ou "groq"
 PORT=3001
 ```
 
@@ -65,8 +67,9 @@ Acesse: **http://localhost:5173**
 - Login/registro com username e senha
 - Criação de personagem (nome, vila, elemento)
 - Narrativa imersiva gerada por IA
-- Sistema de combate com dados d20
+- Sistema de combate com dados d20 (IA solicita a rolagem via [DICE], o jogador rola manualmente na aba de Dados)
 - Barras de HP, Chakra e XP
+- Sistema de atributos com pontos distribuíveis a cada nível (+2 pontos por level up)
 - Inventário de itens
 - Quadro de missões (ranks D-S)
 - Mapa interativo do mundo ninja

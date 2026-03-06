@@ -74,7 +74,9 @@ export default function NarrativeChat() {
             <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="text-red-300 font-medium">Erro</p>
-              <p className="text-red-400/80 mt-0.5">{error}</p>
+              <p className="text-red-400/80 mt-0.5">
+                {typeof error === 'string' ? error : JSON.stringify(error)}
+              </p>
             </div>
           </div>
         )}
