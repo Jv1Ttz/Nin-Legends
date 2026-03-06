@@ -84,48 +84,80 @@ export default function CharacterSelect() {
               {characters.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 hover:border-orange-600/50 transition-all group"
+                  className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 hover:border-orange-600/50 transition-all group flex gap-4"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-100">{c.name}</h3>
-                      <p className="text-sm text-gray-400">
-                        {VILLAGE_ICONS[c.village] || '🏯'} {c.village} · <span className={ELEMENT_COLORS[c.element] || ''}>{c.element}</span>
-                      </p>
+                  {/* Avatar thumbnail */}
+                  <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-700 bg-gray-800 flex-shrink-0">
+                    {c.imageUrl ? (
+                      <img
+                        src={c.imageUrl}
+                        alt={c.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl select-none">
+                        忍
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info + ações */}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-100">{c.name}</h3>
+                        <p className="text-sm text-gray-400">
+                          {VILLAGE_ICONS[c.village] || '🏯'} {c.village} ·{' '}
+                          <span className={ELEMENT_COLORS[c.element] || ''}>{c.element}</span>
+                        </p>
+                      </div>
+                      <span className="bg-orange-900/40 text-orange-300 text-xs px-2 py-1 rounded-full font-medium">
+                        {c.rank}
+                      </span>
                     </div>
-                    <span className="bg-orange-900/40 text-orange-300 text-xs px-2 py-1 rounded-full font-medium">
-                      {c.rank}
-                    </span>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 mb-4">
-                    <div>Nv. <span className="text-gray-200 font-medium">{c.level}</span></div>
-                    <div>HP <span className="text-red-400 font-medium">{c.hp}/{c.maxHp}</span></div>
-                    <div>Chakra <span className="text-blue-400 font-medium">{c.chakra}/{c.maxChakra}</span></div>
-                  </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 mb-4">
+                      <div>
+                        Nv. <span className="text-gray-200 font-medium">{c.level}</span>
+                      </div>
+                      <div>
+                        HP{' '}
+                        <span className="text-red-400 font-medium">
+                          {c.hp}/{c.maxHp}
+                        </span>
+                      </div>
+                      <div>
+                        Chakra{' '}
+                        <span className="text-blue-400 font-medium">
+                          {c.chakra}/{c.maxChakra}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleStart(c.id)}
-                      disabled={starting === c.id || deleting === c.id}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
-                    >
-                      {starting === c.id ? (
-                        <Scroll className="animate-spin" size={16} />
-                      ) : (
-                        <Play size={16} />
-                      )}
-                      {starting === c.id ? 'Entrando no mundo...' : 'Jogar'}
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStart(c.id)}
+                        disabled={starting === c.id || deleting === c.id}
+                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
+                      >
+                        {starting === c.id ? (
+                          <Scroll className="animate-spin" size={16} />
+                        ) : (
+                          <Play size={16} />
+                        )}
+                        {starting === c.id ? 'Entrando no mundo...' : 'Jogar'}
+                      </button>
 
-                    <button
-                      onClick={() => handleDelete(c.id, c.name)}
-                      disabled={deleting === c.id || starting === c.id}
-                      className="px-3 py-2 rounded-lg border border-red-800/60 text-red-300 text-xs flex items-center gap-1 hover:bg-red-900/40 transition disabled:opacity-50"
-                    >
-                      <Trash2 size={14} />
-                      Excluir
-                    </button>
+                      <button
+                        onClick={() => handleDelete(c.id, c.name)}
+                        disabled={deleting === c.id || starting === c.id}
+                        className="px-3 py-2 rounded-lg border border-red-800/60 text-red-300 text-xs flex items-center gap-1 hover:bg-red-900/40 transition disabled:opacity-50"
+                      >
+                        <Trash2 size={14} />
+                        Excluir
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
