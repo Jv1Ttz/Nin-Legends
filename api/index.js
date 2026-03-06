@@ -1,6 +1,8 @@
-export default async function handler(req, res) {
-  const mod = await import('./_server.mjs');
-  const app = mod.default || mod;
-  return app(req, res);
-}
+const app = require('../server/dist/index.js');
+
+module.exports = (req, res) => {
+  const handler = app.default || app;
+  return handler(req, res);
+};
+
 
