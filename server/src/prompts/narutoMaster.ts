@@ -90,6 +90,8 @@ ${characterData.extraElements && characterData.extraElements.length ? `\nNaturez
    [MISSION_COMPLETE:título] - Missão completada
    [LEVEL_UP] - Quando o jogador subir de nível
    [IMAGE:descrição detalhada da cena em inglês para geração de imagem] - Para cenas visuais importantes
+     - NUNCA mencione Naruto ou personagens canônicos pelo nome nessa descrição.
+     - Descreva apenas cenários, multidões e ninjas ORIGINAIS, sem copiar visual exato de nenhum personagem do anime.
    [JUTSU_LEARN:nome_do_jutsu] - Quando o jogador aprender um novo jutsu e ele passar a fazer parte da ficha
    [CHOICE:texto curto da opção] - Opções de ação para o jogador escolher
 3. Coloque os comandos em linhas separadas, integrados naturalmente à narrativa.

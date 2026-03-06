@@ -78,9 +78,9 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 
     const jutsus = [...BASE_JUTSUS, ...STARTER_JUTSUS[element], clanData.starterJutsu];
 
-    // Roleta de Jinchuriki: chance pequena e fixa por personagem criado.
-    // Ex.: 5% de chance de nascer como Jinchuriki.
-    const JINCHURIKI_CHANCE = 0.05;
+    // Roleta de Jinchuriki: chance fixa por personagem criado.
+    // Ex.: 30% de chance de nascer como Jinchuriki.
+    const JINCHURIKI_CHANCE = 0.3;
     const isJinchuriki = Math.random() < JINCHURIKI_CHANCE;
 
     let imageUrl: string | null = null;
@@ -94,6 +94,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
     }
 
     const character = await prisma.character.create({
+      // Cast para evitar descompasso temporário entre tipos gerados e schema.
       data: {
         userId,
         name,
@@ -107,7 +108,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         inventory: {
           create: STARTER_ITEMS,
         },
-      },
+      } as any,
       include: { inventory: true },
     });
 
@@ -230,7 +231,7 @@ router.post('/:id/spend-attr', authMiddleware, async (req: AuthRequest, res: Res
     }
 
     const currentVal = (character as any)[attribute] as number;
-    const points = character.attrPoints ?? 0;
+    const points = (character as any).attrPoints ?? 0;
 
     // Custo progressivo: 1 ponto até 10, 2 pontos de 11–15, 3 pontos 16+.
     let cost = 1;
@@ -244,10 +245,12 @@ router.post('/:id/spend-attr', authMiddleware, async (req: AuthRequest, res: Res
 
     const updated = await prisma.character.update({
       where: { id: character.id },
+      // Cast para aceitar attrPoints no objeto de atualização mesmo
+      // se o client TypeScript ainda não tiver sido recarregado.
       data: {
         attrPoints: points - cost,
         [attribute]: currentVal + 1,
-      },
+      } as any,
     });
 
     res.json({ character: updated });

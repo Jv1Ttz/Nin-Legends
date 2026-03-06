@@ -153,7 +153,11 @@ export async function generateImage(prompt: string): Promise<string | null> {
   const modelId = 'gemini-2.5-flash-image';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-  const fullPrompt = `masterpiece, high-quality anime style, Naruto Shippuden official art style, Studio Pierrot aesthetic, ${prompt}, dynamic composition, cinematic lighting, sharp lines, cel shaded, 8k resolution, highly detailed`;
+  const fullPrompt =
+    `masterpiece, high-quality shounen ninja anime style, ` +
+    `inspired by classic ninja anime but with entirely original characters, ` +
+    `no copyrighted characters (no Naruto, no Sasuke, no existing anime characters), ` +
+    `${prompt}, dynamic composition, cinematic lighting, sharp lines, cel shaded, 8k resolution, highly detailed`;
 
   try {
     const res = await fetch(url, {
