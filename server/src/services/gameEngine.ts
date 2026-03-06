@@ -15,7 +15,8 @@ export interface CombatEnemy {
 
 export function parseCommands(narrative: string): GameCommand[] {
   const commands: GameCommand[] = [];
-  const regex = /\[(DICE|DAMAGE|HEAL|CHAKRA_USE|CHAKRA_RESTORE|XP|RYOU|ITEM_ADD|ITEM_REMOVE|LOCATION|COMBAT_START|COMBAT_END|MISSION_START|MISSION_COMPLETE|LEVEL_UP|IMAGE|ENEMY|ENEMY_DAMAGE|JUTSU_LEARN):?([^\]]*)\]/g;
+  const regex =
+    /\[(DICE|DAMAGE|HEAL|CHAKRA_USE|CHAKRA_RESTORE|XP|RYOU|ITEM_ADD|ITEM_REMOVE|LOCATION|COMBAT_START|COMBAT_END|MISSION_START|MISSION_COMPLETE|LEVEL_UP|IMAGE|ENEMY|ENEMY_DAMAGE|JUTSU_LEARN|ELEMENT_UNLOCK):?([^\]]*)\]/g;
   let match;
 
   while ((match = regex.exec(narrative)) !== null) {
@@ -36,7 +37,10 @@ export function parseChoices(narrative: string): string[] {
 
 export function stripCommands(narrative: string): string {
   return narrative
-    .replace(/\[(DICE|DAMAGE|HEAL|CHAKRA_USE|CHAKRA_RESTORE|XP|RYOU|ITEM_ADD|ITEM_REMOVE|LOCATION|COMBAT_START|COMBAT_END|MISSION_START|MISSION_COMPLETE|LEVEL_UP|IMAGE|ENEMY|ENEMY_DAMAGE|JUTSU_LEARN):[^\]]*\]/g, '')
+    .replace(
+      /\[(DICE|DAMAGE|HEAL|CHAKRA_USE|CHAKRA_RESTORE|XP|RYOU|ITEM_ADD|ITEM_REMOVE|LOCATION|COMBAT_START|COMBAT_END|MISSION_START|MISSION_COMPLETE|LEVEL_UP|IMAGE|ENEMY|ENEMY_DAMAGE|JUTSU_LEARN|ELEMENT_UNLOCK):[^\]]*\]/g,
+      ''
+    )
     .replace(/\[(COMBAT_START|COMBAT_END|LEVEL_UP)\]/g, '')
     .replace(/\[CHOICE:[^\]]*\]/g, '')
     .replace(/\n{3,}/g, '\n\n')
@@ -106,6 +110,10 @@ export async function processCommands(
   let ryouDelta = 0;
   let newLocation: string | null = null;
   let jutsuList: string[] = [];
+  let extraElements: string[] = Array.isArray((character as any).extraElements)
+    ? // clone para não mutar referência direta do Prisma
+      [...((character as any).extraElements as string[])]
+    : [];
   try {
     jutsuList = JSON.parse(character.jutsus || '[]');
     if (!Array.isArray(jutsuList)) jutsuList = [];
@@ -116,8 +124,13 @@ export async function processCommands(
   for (const cmd of commands) {
     switch (cmd.type) {
       case 'DICE': {
-        // A IA apenas solicita a rolagem; o jogador rola manualmente na aba de Dados.
-        result.combatLog.push(`Rolagem solicitada: ${cmd.value} (use a aba de Dados para rolar)`);
+        // Rolagem automática feita pelo servidor, a partir da expressão enviada pela IA.
+        const roll = rollDice(cmd.value);
+        result.diceResults.push(roll);
+        result.combatLog.push(
+          `Rolagem: ${roll.expression} = ${roll.total}` +
+            (roll.rolls.length ? ` (dados: ${roll.rolls.join(', ')})` : '')
+        );
         break;
       }
       case 'DAMAGE': {
@@ -202,7 +215,7 @@ export async function processCommands(
       }
       case 'ITEM_ADD': {
         const parts = cmd.value.split('|');
-        if (parts.length >= 3) {
+        if (parts.length >= 4) {
           await prisma.inventoryItem.create({
             data: {
               characterId,
@@ -273,6 +286,14 @@ export async function processCommands(
         }
         break;
       }
+      case 'ELEMENT_UNLOCK': {
+        const elem = cmd.value.trim();
+        if (elem && !extraElements.includes(elem)) {
+          extraElements.push(elem);
+          result.combatLog.push(`Nova natureza de chakra despertada: ${elem}`);
+        }
+        break;
+      }
     }
   }
 
@@ -312,6 +333,10 @@ export async function processCommands(
     rank: newRank,
     jutsus: JSON.stringify(jutsuList),
   };
+
+  if (extraElements.length) {
+    updateData.extraElements = extraElements;
+  }
 
   if (shouldLevelUp) {
     const attrPointsGain = levelsGained * 2;

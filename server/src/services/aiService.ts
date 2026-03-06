@@ -1,6 +1,5 @@
 import Groq from 'groq-sdk';
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
-import { InferenceClient } from '@huggingface/inference';
 
 type Provider = 'groq' | 'gemini';
 
@@ -144,28 +143,55 @@ export async function generateNarrative(
   });
 }
 
+/** Geração de imagem via Nano Banana (Gemini Image Generation) usando chave dedicada. */
 export async function generateImage(prompt: string): Promise<string | null> {
-  const hfKey = process.env.HUGGINGFACE_API_KEY;
-  if (!hfKey || hfKey === 'your-huggingface-api-key-here') {
+  const apiKey = process.env.GEMINI_NANO_KEY ?? process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
     return null;
   }
 
-  try {
-    const client = new InferenceClient(hfKey);
-    const image = await client.textToImage(
-      {
-        // SDXL base oficial da Stability AI, com suporte em Inference Providers.
-        model: 'stabilityai/stable-diffusion-xl-base-1.0',
-        inputs: `anime style, original ninja RPG character (not Naruto, not an existing anime character), ${prompt}, high quality, detailed, vibrant colors`,
-      },
-      { outputType: 'blob' }
-    );
+  const modelId = 'gemini-2.5-flash-image';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-    const buffer = Buffer.from(await image.arrayBuffer());
-    const base64 = buffer.toString('base64');
-    return `data:image/png;base64,${base64}`;
+  const fullPrompt = `masterpiece, high-quality anime style, Naruto Shippuden official art style, Studio Pierrot aesthetic, ${prompt}, dynamic composition, cinematic lighting, sharp lines, cel shaded, 8k resolution, highly detailed`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE'],
+          responseMimeType: 'text/plain',
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Nano Banana API error:', res.status, errText);
+      return null;
+    }
+
+    const data = (await res.json()) as {
+      candidates?: Array<{
+        content?: { parts?: Array<{ inlineData?: { mimeType?: string; data?: string }; text?: string }> };
+      }>;
+    };
+
+    const parts = data.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      if (part.inlineData?.data) {
+        const mime = part.inlineData.mimeType ?? 'image/png';
+        return `data:${mime};base64,${part.inlineData.data}`;
+      }
+    }
+
+    console.error('Nano Banana: no image in response');
+    return null;
   } catch (err) {
-    console.error('Image generation error:', err);
+    console.error('Image generation error (Nano Banana):', err);
     return null;
   }
 }

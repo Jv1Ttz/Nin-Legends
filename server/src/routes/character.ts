@@ -78,6 +78,11 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 
     const jutsus = [...BASE_JUTSUS, ...STARTER_JUTSUS[element], clanData.starterJutsu];
 
+    // Roleta de Jinchuriki: chance pequena e fixa por personagem criado.
+    // Ex.: 5% de chance de nascer como Jinchuriki.
+    const JINCHURIKI_CHANCE = 0.05;
+    const isJinchuriki = Math.random() < JINCHURIKI_CHANCE;
+
     let imageUrl: string | null = null;
     if (appearance && appearance.trim().length > 10) {
       const prompt =
@@ -95,6 +100,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         clan: clanData.id,
         village,
         element,
+        isJinchuriki,
         ...stats,
         imageUrl,
         jutsus: JSON.stringify(jutsus),

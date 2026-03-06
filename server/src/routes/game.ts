@@ -53,9 +53,19 @@ router.post('/start', authMiddleware, async (req: AuthRequest, res: Response) =>
 
     const narrative = await generateNarrative(systemPrompt, [], OPENING_INSTRUCTION);
     const commands = parseCommands(narrative);
-    const choices = parseChoices(narrative);
+    let choices = parseChoices(narrative);
     const gameResult = await processCommands(characterId, commands, session.id, false);
     const cleanNarrative = stripCommands(narrative);
+
+    // Fallback: se o modelo esquecer de enviar [CHOICE:...] na abertura, cria opções padrão
+    if (!choices.length) {
+      choices = [
+        'Explorar a academia e arredores',
+        'Conversar com um colega ou sensei',
+        'Treinar um jutsu ou exercício básico',
+        'Observar em silêncio o ambiente',
+      ];
+    }
 
     let imageUrl: string | null = null;
     if (gameResult.imagePrompt) {
@@ -123,9 +133,29 @@ router.post('/action', authMiddleware, async (req: AuthRequest, res: Response) =
 
     const narrative = await generateNarrative(systemPrompt, history, action);
     const commands = parseCommands(narrative);
-    const choices = parseChoices(narrative);
+    let choices = parseChoices(narrative);
     const gameResult = await processCommands(character.id, commands, sessionId, inCombat ?? false);
     const cleanNarrative = stripCommands(narrative);
+
+    // Fallback: se o modelo esquecer de enviar [CHOICE:...] após uma ação,
+    // cria opções genéricas baseadas no estado de combate
+    if (!choices.length) {
+      if (gameResult.inCombat) {
+        choices = [
+          'Atacar com taijutsu',
+          'Usar um jutsu ofensivo',
+          'Defender e observar o inimigo',
+          'Tentar recuar do combate',
+        ];
+      } else {
+        choices = [
+          'Explorar a área ao redor',
+          'Conversar com algum NPC próximo',
+          'Treinar um jutsu ou técnica',
+          'Procurar uma nova missão',
+        ];
+      }
+    }
 
     let imageUrl: string | null = null;
     if (gameResult.imagePrompt) {

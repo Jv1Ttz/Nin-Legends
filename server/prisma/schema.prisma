@@ -23,6 +23,10 @@ model Character {
   village       String
   element       String
   imageUrl      String?
+  // Sorteio especial: chance pequena de nascer como Jinchuriki.
+  isJinchuriki  Boolean       @default(false)
+  // Naturezas adicionais de chakra desbloqueadas ao longo da campanha.
+  extraElements String[]      @default([])
   rank          String        @default("Estudante")
   level         Int           @default(1)
   xp            Int           @default(0)

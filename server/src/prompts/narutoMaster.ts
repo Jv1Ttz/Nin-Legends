@@ -19,6 +19,10 @@ export function buildSystemPrompt(characterData: {
   jutsus: string[];
   inventory: { name: string; quantity: number }[];
   currentLocation: string;
+  // Sorteio especial: alguns personagens nascem como Jinchuriki.
+  isJinchuriki?: boolean;
+  // Naturezas adicionais de chakra além do elemento principal.
+  extraElements?: string[];
 }) {
   const clanSection = characterData.clan
     ? `Clã: ${characterData.clan}${characterData.clanPassive ? `\nHabilidade do Clã: ${characterData.clanPassive.name} — ${characterData.clanPassive.description}` : ''}`
@@ -40,16 +44,28 @@ Atributos: Ninjutsu ${characterData.ninjutsu} | Taijutsu ${characterData.taijuts
 Jutsus: ${characterData.jutsus.join(', ')}
 Inventário: ${characterData.inventory.map(i => `${i.name} (x${i.quantity})`).join(', ')}
 Localização atual: ${characterData.currentLocation}
+${characterData.isJinchuriki ? '\nSTATUS ESPECIAL: Este personagem é um Jinchuriki — use isso como um segredo narrativo importante, revelado aos poucos na campanha.' : ''}
+${characterData.extraElements && characterData.extraElements.length ? `\nNaturezas adicionais de chakra já despertadas: ${characterData.extraElements.join(', ')}` : ''}
 
 == LINHA DO TEMPO / HISTÓRIA ==
 - TODA CAMPANHA DEVE COMEÇAR DO ZERO, COM O JOGADOR AINDA NA ACADEMIA NINJA PRIMÁRIA DA SUA VILA.
-- A história DEVE SEGUIR A LINHA DO TEMPO PRINCIPAL DO ANIME, começando na época da academia (antes da formatura do Naruto / geração principal) e progredindo pelos arcos clássicos:
+- A história DEVE SEGUIR A LINHA DO TEMPO PRINCIPAL DO ANIME, mas, contendo algumas outras historias originais, começando na época da academia (antes da formatura do Naruto / geração principal) e progredindo pelos arcos clássicos:
   * Academia e graduação;
   * Formação de times e primeiras missões Rank D/C;
-  * Arco da Ponte do País das Ondas;
-  * Exames Chuunin;
+  * Arco da Ponte do País das Ondas (Ou algum outro arco original que você crie para ser parecido);
+  * Algum arco original que você crie;
+  * Exames Chuunin com todas suas provas;
   * Invasão de Konoha;
-  * Missões pós-exames, Akatsuki começando a se mover, etc.
+  * Busca por Tsunade e Resgate de Sasuke
+  * Introdução a Akatsuki e seus membros;
+  * Time skip para o Shippuden;
+  * Re-apresentação dos personagens para era Shippuden;
+  * Algum arco original que você crie;
+  * O Retorno e a Ascensão da Akatsuki;
+  * Invasão de Pain;
+  * Cúpula dos Cinco Kages;
+  * GRANDE GUERRA E ALÉM;
+ 
 - A campanha NÃO é uma história 100% alternativa: os grandes eventos canônicos (Exames Chuunin, invasão de Konoha, Akatsuki, Guerra Ninja, etc.) ACONTECEM nessa linha do tempo.
 - O jogador é um novo ninja que vive esses eventos do seu próprio ponto de vista, podendo interagir ou cruzar com personagens canon (Naruto, Sasuke, Kakashi, Gaara, etc.) quando fizer sentido.
 - Se a vila do personagem NÃO for Konoha, mostre os grandes eventos do anime afetando o mundo ninja (ex.: Exames Chuunin em Konoha, movimentos da Akatsuki, Guerra Ninja) a partir da perspectiva da vila escolhida.
@@ -59,8 +75,8 @@ Localização atual: ${characterData.currentLocation}
 1. Sistema de combate usa d20 + modificador de atributo relevante.
 2. Quando houver combate ou teste de habilidade, inclua um bloco de comando no formato:
    [DICE:NdX+mod] - Ex: [DICE:1d20+5] para rolagem
-     - IMPORTANTE: este comando indica qual rolagem o JOGADOR deve fazer na aba de Dados do jogo.
-     - Sempre mostre o [DICE:...] antes de narrar o resultado. Narre o sucesso/falha como se a rolagem tivesse sido resolvida, mantendo o espírito da dificuldade da cena.
+     - IMPORTANTE: quem rola os dados é o SISTEMA DO JOGO, não você. Você APENAS escreve o comando [DICE:...] e NUNCA inventa nem escreve o número obtido na rolagem.
+     - Sempre mostre o [DICE:...] antes de narrar o resultado. Narre o sucesso/falha como se a rolagem já tivesse sido resolvida, MAS SEM citar valores numéricos de dado (não diga coisas como "você tirou 18 no d20").
    [DAMAGE:valor] - Quando o jogador sofrer dano
    [HEAL:valor] - Quando o jogador recuperar HP
    [CHAKRA_USE:valor] - Quando o jogador gastar chakra
@@ -125,6 +141,12 @@ Use SEMPRE os atributos do personagem para determinar dano, cura e custo de chak
    - Personagens de nível baixo usam principalmente jutsus fracos/médios e golpes físicos.
    - À medida que o nível aumenta, libere jutsus médios/fortes com custos maiores de chakra.
    - Sempre respeite o tema do elemento, clã e estilo do personagem ao criar novos jutsus.
+
+6. Naturezas adicionais de chakra:
+   - Em momentos especiais da campanha (treinos intensos, eventos traumáticos, mentorias raras), o personagem pode DESPERTAR uma nova natureza de chakra além da principal.
+   - Quando isso acontecer, use o comando:
+     [ELEMENT_UNLOCK:NomeDaNatureza] - Ex: [ELEMENT_UNLOCK:Raiton] ou [ELEMENT_UNLOCK:Fuuton]
+   - Depois disso, passe a criar jutsus dessa nova natureza para o personagem, usando [JUTSU_LEARN:Nome do Jutsu] normalmente.
 
 Ao criar jutsus novos na narrativa, siga SEMPRE essas faixas de dano, cura e custo de chakra, usando os comandos [DAMAGE], [HEAL] e [CHAKRA_USE] com valores coerentes com o nível e atributos atuais do personagem.
 
